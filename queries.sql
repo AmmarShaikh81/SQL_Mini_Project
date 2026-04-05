@@ -93,3 +93,51 @@ select distinct city from customers as c join orders as o on c.customer_id=o.cus
 /*calculate the stock remaining after fulfilling all orders */
 select b.book_id,b.title,b.stock,coalesce(sum(o.quantity),0) as order_quantity,b.stock-coalesce (sum(o.quantity),0) as remaining_quantity 
 from books b left join orders as o on b.book_id=o.book_id group by b.book_id;
+
+/*find the top book in each genre*/
+SELECT *
+FROM (
+    SELECT 
+        b.genre,
+        b.title,
+        SUM(o.quantity) AS total_sold,
+        ROW_NUMBER() OVER (PARTITION BY b.genre ORDER BY SUM(o.quantity) DESC) AS rn
+    FROM books b
+    JOIN orders o ON b.book_id = o.book_id
+    GROUP BY b.genre, b.title
+) t
+WHERE rn = 1;
+
+/*Ranking the books by sales (Window Functions*/
+SELECT 
+    b.title,
+    SUM(o.quantity) AS total_sold,
+    RANK() OVER (ORDER BY SUM(o.quantity) DESC) AS rank_position
+FROM books b
+JOIN orders o ON b.book_id = o.book_id
+GROUP BY b.title;
+
+/*genre wise sales using cte*/
+WITH genre_sales AS (
+    SELECT b.genre, SUM(o.quantity) AS total_sold
+    FROM books b
+    JOIN orders o ON b.book_id = o.book_id
+    GROUP BY b.genre
+)
+
+SELECT *
+FROM genre_sales
+ORDER BY total_sold DESC;
+
+
+/*top customer based on total spending using cte*/
+WITH customer_spending AS (
+    SELECT customer_id, SUM(total_amount) AS total_spent
+    FROM orders
+    GROUP BY customer_id
+)
+
+SELECT *
+FROM customer_spending
+ORDER BY total_spent DESC
+LIMIT 5;
