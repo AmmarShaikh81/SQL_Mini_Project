@@ -19,3 +19,8 @@ This project analyzes customer purchasing behavior and book ordering patterns us
 - Aggregate Functions (SUM, COUNT, AVG)
 - Subqueries
 - COALESCE
+
+
+##Advanced SQL:
+- CTE (WITH clause)
+- Window Functions (RANK, ROW_NUMBER)
